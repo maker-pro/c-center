@@ -4,15 +4,18 @@ require __DIR__ . '/../conf.php';
 
 $link = new mysqli($servername, $username, $password, $database);
 
+if (!isset($_GET['client_id']) || empty($_GET['client_id'])) {
+	return returnInfo(NOCLIENTIDCODE, NOCLIENTIDMSG);
+}
+
+$client_id = $_GET['client_id'];
+
 $sql = 'select * from db_crawler_task where Status = "NEW" order by TaskId asc limit 1;';
 $res = $link->query($sql);
 $row = $res->fetch_assoc();
 
 if (empty($row)) {
-	return array(
-		'msgCode' => '5001',	// 没有数据
-		'msg'	  => 'NoTask'
-	);
+	return returnInfo(NOTASKCODE, NOTASKMSG);
 }
 
 $task_list = json_decode($row['TaskList'], true);
@@ -28,7 +31,7 @@ $task = array(
 	'task_type' => $row['TaskType'],
 	'task_list' => $task_list,
 	'task_num'  => count($task_list),
-	'msgCode' => '2000',
+	'msgCode' => SUCCCODE,
 );
 
 echo json_encode($task);
